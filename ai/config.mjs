@@ -1,4 +1,6 @@
-export const defaults = Object.freeze({ regionSize: 512, wardHours: 0.5, harness: 'codex', banter: true, reasoningEffort: 0, dshThinking: true, modelSelections: {}, setupComplete: false, diagnosticsEnabled: false });
+export const harnesses = Object.freeze(['codex', 'claude', 'dsh', 'doubao']);
+
+export const defaults = Object.freeze({ regionSize: 512, wardHours: 0.5, harness: 'codex', banter: true, reasoningEffort: 0, dshThinking: true, doubaoApiKey: '', modelSelections: {}, setupComplete: false, diagnosticsEnabled: false });
 
 export const signals = Object.freeze({
   missing: { label: 'Question', mode: 'explore', prompt: 'Explain the selected page region thoroughly. Proactively use computer use to navigate, scroll and expand relevant content, and search related files, memory and sessions through the harness. Infer plausible intentions from evidence; when ambiguous, explain the most useful interpretations rather than immediately handing the question back. Distinguish observed facts from hypotheses. Deliver a useful Markdown explanation with LaTeX or code when helpful. Exploration is for understanding, not editing data or sending messages.' },
@@ -25,15 +27,16 @@ export function validateConfig(value = {}) {
     if (!Number.isFinite(result[key]) || result[key] < min || result[key] > max) throw new Error(`${key} must be between ${min} and ${max}`);
   }
   if (!Number.isInteger(result.regionSize)) throw new Error('regionSize must be an integer');
-  if (!['codex', 'claude', 'dsh'].includes(result.harness)) throw new Error('Unknown harness');
+  if (!harnesses.includes(result.harness)) throw new Error('Unknown harness');
   if (typeof result.dshThinking !== 'boolean') throw new Error('dshThinking must be boolean');
+  if (typeof result.doubaoApiKey !== 'string' || result.doubaoApiKey.length > 500) throw new Error('doubaoApiKey must be a short string');
   if (typeof result.banter !== 'boolean') throw new Error('banter must be boolean');
   if (!Number.isInteger(result.reasoningEffort) || result.reasoningEffort < 0 || result.reasoningEffort > 8) throw new Error('Reasoning level must be an integer from 0 to 8');
   if (typeof result.diagnosticsEnabled !== 'boolean') throw new Error('diagnosticsEnabled must be boolean');
   if (typeof result.setupComplete !== 'boolean') throw new Error('setupComplete must be boolean');
   if (!result.modelSelections || typeof result.modelSelections !== 'object' || Array.isArray(result.modelSelections)) throw new Error('Invalid model selections');
   for (const [harness, selection] of Object.entries(result.modelSelections)) {
-    if (!['codex', 'claude', 'dsh'].includes(harness) || !selection || typeof selection.model !== 'string' || selection.model.length > 500 || typeof selection.fastMode !== 'boolean') throw new Error('Invalid model selection');
+    if (!harnesses.includes(harness) || !selection || typeof selection.model !== 'string' || selection.model.length > 500 || typeof selection.fastMode !== 'boolean') throw new Error('Invalid model selection');
   }
   const modes = new Set(['observe', 'explore', 'execute', 'interrupt', 'stop', 'ward', 'unward', 'emotion']);
   for (const [id, entry] of Object.entries(result.mappings ?? {})) {

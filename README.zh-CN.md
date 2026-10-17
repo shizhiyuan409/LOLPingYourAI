@@ -6,12 +6,12 @@
 
 **在桌面任何地方 ping 一下，AI 队友立刻拿到上下文。**
 
-按住 <kbd>⌥ Option</kbd> 拖动，松开选中信号。像在峡谷里打信号一样，把你指着的地方、它所在的窗口和这个信号的意思一起发给 Codex、Claude 或 DSH 队友。它会反 ping 你、解释、动手操作那个窗口；你喊一声 **危险**，它马上停下。
+按住 <kbd>⌥ Option</kbd> 拖动，松开选中信号。像在峡谷里打信号一样，把你指着的地方、它所在的窗口和这个信号的意思一起发给 Codex、Claude、DSH 或豆包队友。它会反 ping 你、解释、动手操作那个窗口；你喊一声 **危险**，它马上停下。
 
 <a href="https://github.com/ChristianYang37/LOLPingYourAI/releases/latest"><img src="https://img.shields.io/github/v/release/ChristianYang37/LOLPingYourAI?label=release&color=c8aa6e&labelColor=0a1428" alt="最新版本"></a>
 <a href="https://github.com/ChristianYang37/LOLPingYourAI/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ChristianYang37/LOLPingYourAI/ci.yml?branch=main&label=CI&labelColor=0a1428" alt="CI"></a>
 <img src="https://img.shields.io/badge/macOS-Apple%20Silicon-c8aa6e?labelColor=0a1428&logo=apple&logoColor=white" alt="macOS Apple Silicon">
-<img src="https://img.shields.io/badge/teammate-Codex%20%C2%B7%20Claude-0ac8b9?labelColor=0a1428" alt="Codex 与 Claude">
+<img src="https://img.shields.io/badge/teammate-Codex%20%C2%B7%20Claude%20%C2%B7%20Doubao-0ac8b9?labelColor=0a1428" alt="Codex、Claude 与豆包">
 <a href="LICENSE"><img src="https://img.shields.io/badge/code-MIT-1fa9e0?labelColor=0a1428" alt="代码采用 MIT 许可"></a>
 
 [English](README.md) · **简体中文** · [下载](https://github.com/ChristianYang37/LOLPingYourAI/releases/latest) · [▶ 演示视频](docs/media/promo-zh.mp4) · [实现与接口](docs/architecture.md) · [实测记录](docs/verification.md)
@@ -32,7 +32,7 @@
 - **什么**：区域所在的窗口，包括应用、标题、位置和稳定的窗口 ID。
 - **想干嘛**：信号对应的指令，例如*解释一下*、*帮我做完*、*停下*、*30 分钟后再来看看*。
 
-队友就是你已经在用的 Codex、Claude 或 DSH harness，沿用它自己的模型、账号、工具和记忆。LOLPingYourAI 不另造规划器，也不另做历史检索服务，只负责 ping、内置的 skill 和一组范围很窄的桌面工具。
+队友就是你已经在用的 Codex、Claude、DSH 或豆包 harness，沿用它自己的模型、账号、工具和记忆。LOLPingYourAI 不另造规划器，也不另做历史检索服务，只负责 ping、内置的 skill 和一组范围很窄的桌面工具。
 
 <table>
 <tr>
@@ -59,6 +59,7 @@
 - 选择 harness 后自动加载它的模型列表；每个 harness 分别保存模型与快速模式设置。快速模式**默认关闭**，换模型时重置为关闭，只有后端明确支持才允许开启；更改从下一轮生效。
 - 思考强度默认 **0**，即当前模型最低档；**1** 是第二低档，超出范围取最高档。启动一轮后显示实际生效值。DSH 默认开启思考，数字只计算开启档，关闭思考使用独立开关。
 - 新增 **DeepSeek Harness（DSH）ACP** 适配，详见[安装、免费 API 配置与验证范围](docs/dsh.md#中文)。
+- **豆包（Doubao）** 是一等队友：它直接调用火山方舟的 OpenAI 兼容接口（`ark.cn-beijing.volces.com/api/v3`），流式回复、能看懂 ping 截图，并通过函数调用驱动与其它队友相同的本地 MCP 桌面工具。需要自带方舟 API Key（见[豆包配置](#豆包配置)），密钥只保存在本地。
 
 v0.1.4 将聊天首页、上游交互改进和探索反馈统一带入双平台安装包；下载资产在发布 tag 的 CI 通过后出现。
 
@@ -147,6 +148,19 @@ v0.1.4 将聊天首页、上游交互改进和探索反馈统一带入双平台�
 
 支持查找 Windows Codex 桌面应用内置程序和标准 npm 安装；必要时在启动前将 `LOLPINGAI_CODEX` 设为 `codex.exe` 的绝对路径。紧急停止键为 **Ctrl+Alt+Esc**。构建、测试和验证边界见 [Windows 说明](docs/windows.md)。
 
+## 豆包配置
+
+豆包在 macOS 和 Windows 上均可使用，只要有[火山方舟](https://console.volcengine.com/ark)平台账号：
+
+1. **获取 API Key**：在火山方舟控制台创建 API Key，并在「开通管理」中开通要用的模型。内置模型候选包括 `doubao-seed-1-6-250615`、`doubao-seed-1-6-thinking-250615`、`doubao-1-5-pro-32k-250115`、`doubao-1-5-flash-32k-250115`、`doubao-1-5-vision-pro-32k-250115`；自己在控制台创建的推理接入点 ID（`ep-…`）也可以填进自定义模型字段。
+2. **把 Key 交给应用**（任选其一）：
+   - 设置 → **AI Teammate / 你的队友** → 选择 **Doubao（豆包）** → 在「豆包 API Key（火山方舟）」输入框粘贴 Key（只保存在本地应用设置中），或
+   - 启动前设置环境变量 `ARK_API_KEY`（或 `DOUBAO_API_KEY`），或
+   - 在应用数据目录（macOS 为 `~/Library/Application Support/LOLPingYourAI`，Windows 为 `%APPDATA%\LOLPingYourAI`）创建 `doubao-key.txt` 文件，第一行写入 Key。
+3. **开始 ping**：队友流式输出 Markdown 回复，能看懂 ping 截图（视觉模型），并通过与其它队友相同的本地 MCP 桥接调用 `desktop_action`、`screenshot`、`reply_ping`、`save_handoff`、`ward`。会话跨多次 ping 与重启继续，历史保存在本地。
+
+DSH 用户也可以借助 [`examples/dsh-doubao.patch.yml`](examples/dsh-doubao.patch.yml) 让 DSH 使用豆包；原生豆包队友不需要安装 DSH。
+
 ## 平台状态
 
 | 组合 | 状态 |
@@ -154,6 +168,7 @@ v0.1.4 将聊天首页、上游交互改进和探索反馈统一带入双平台�
 | macOS Apple Silicon＋**Codex** | ✅ 已用真实模型跑通桌面闭环（解释、编辑、中断、恢复、最大化、插眼），提供 DMG |
 | macOS＋**Claude** | 🧪 Agent SDK 适配器，带只读上下文工具；协议测试通过，尚待登录后的桌面实测 |
 | macOS＋**DSH** | 🧪 前一安装版已完成百炼截图、编辑和恢复实测；当前源码已验证协议与回归。[安装与验证范围](docs/dsh.md#中文) |
+| macOS/Windows＋**豆包** | 🧪 原生 OpenAI 兼容适配器，支持流式、视觉与 MCP 工具调用；已用合成 API/桥接做协议测试，自带 Key 的实机验证记录见 [docs/verification.md](docs/verification.md) |
 | Windows x64 | 已在 Windows 10 验证原生窗口/输入回归及打包应用启动、重启；新增 Windows 2022/2025 CI 与 NSIS 安装生命周期检查。各 harness 和硬件验证边界见 [Windows 实测说明](docs/windows.md)。 |
 
 哪些真正测过、哪些没有，都记录在 [docs/verification.md](docs/verification.md)。
@@ -217,7 +232,7 @@ pnpm dist:mac                                   # 在 release/ 生成 Apple Sili
 pnpm dist                                       # Windows x64 安装包（需在 Windows 上执行）
 ```
 
-可复用的[验收工具](tools/acceptance/README.md)通过本地桥接支持 Codex、Claude、DSH，诊断输出仅保存在本地。尚未解决的原生输入和界面问题见 [Claude 问题审核与修复方案](docs/claude-acceptance-audit.md)。
+可复用的[验收工具](tools/acceptance/README.md)通过本地桥接支持 Codex、Claude、DSH、豆包，诊断输出仅保存在本地。尚未解决的原生输入和界面问题见 [Claude 问题审核与修复方案](docs/claude-acceptance-audit.md)。
 
 | 路径 | 内容 |
 | --- | --- |
@@ -225,7 +240,7 @@ pnpm dist                                       # Windows x64 安装包（需在
 | `native/desktop/` | Swift／C# 助手：窗口定位、截图、受限输入 |
 | `src/main/` | Electron 主进程、覆盖层、设置、队友生命周期 |
 | `src/renderer/` | 信号与表情轮盘覆盖层、React 设置窗口 |
-| `ai/` | 队友服务、Codex／Claude／DSH 适配器、MCP 服务、本地桥接、命令行 |
+| `ai/` | 队友服务、Codex／Claude／DSH／豆包适配器、MCP 服务、本地桥接、命令行 |
 | `skills/lolping-your-ai/` | 教会 agent 理解每个信号的 skill |
 | `promo/` | 演示视频与 README 动图的 Remotion 源码 |
 

@@ -9,7 +9,7 @@ import { Teammate } from '../../../ai/service.mjs';
 import { startBridge } from '../../../ai/server.mjs';
 
 // Real HTTP bridge + real service, synthetic adapter and desktop. No account/UI access.
-for (const harness of ['codex', 'claude', 'dsh']) test(`${harness}: runner integrates with the shipped bridge and service`, async t => {
+for (const harness of ['codex', 'claude', 'dsh', 'doubao']) test(`${harness}: runner integrates with the shipped bridge and service`, async t => {
   const dir = await mkdtemp(join(tmpdir(), 'acceptance-bridge-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const saved = {};

@@ -62,7 +62,7 @@ test('real loopback transport rejects HTTP errors and has a finite timeout', asy
 test('timeout never becomes a successful acceptance result', async () => {
   await assert.rejects(poll(async () => ({}), () => false, { ...fakeClock(), timeoutMs: 5 }), /timed out/);
 });
-for (const harness of ['codex', 'claude', 'dsh']) test(`${harness}: completion uses matching task state and actual board text`, async () => {
+for (const harness of ['codex', 'claude', 'dsh', 'doubao']) test(`${harness}: completion uses matching task state and actual board text`, async () => {
   const app = mockApp(harness);
   await drive(app, { harness, steps: [{ signal: 'missing', expectText: app.board.value }] }, { loadBoard: async () => app.board });
   assert.equal(app.calls.find(c => c.method === 'ping').args.target.id, '42');

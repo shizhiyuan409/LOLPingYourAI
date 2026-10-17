@@ -6,12 +6,12 @@
 
 **Ping anywhere on your desktop. Your AI teammate gets the context.**
 
-Hold <kbd>⌥ Option</kbd>, drag, release on a signal. A League-style ping sends the spot you pointed at, the window it belongs to and what the signal means to your Codex, Claude or DSH teammate. It pings back, explains, works in that window, and stops the moment you call **Danger**.
+Hold <kbd>⌥ Option</kbd>, drag, release on a signal. A League-style ping sends the spot you pointed at, the window it belongs to and what the signal means to your Codex, Claude, DSH or Doubao teammate. It pings back, explains, works in that window, and stops the moment you call **Danger**.
 
 <a href="https://github.com/ChristianYang37/LOLPingYourAI/releases/latest"><img src="https://img.shields.io/github/v/release/ChristianYang37/LOLPingYourAI?label=release&color=c8aa6e&labelColor=0a1428" alt="Latest release"></a>
 <a href="https://github.com/ChristianYang37/LOLPingYourAI/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ChristianYang37/LOLPingYourAI/ci.yml?branch=main&label=CI&labelColor=0a1428" alt="CI"></a>
 <img src="https://img.shields.io/badge/macOS-Apple%20Silicon-c8aa6e?labelColor=0a1428&logo=apple&logoColor=white" alt="macOS Apple Silicon">
-<img src="https://img.shields.io/badge/teammate-Codex%20%C2%B7%20Claude-0ac8b9?labelColor=0a1428" alt="Codex and Claude">
+<img src="https://img.shields.io/badge/teammate-Codex%20%C2%B7%20Claude%20%C2%B7%20Doubao-0ac8b9?labelColor=0a1428" alt="Codex, Claude and Doubao">
 <a href="LICENSE"><img src="https://img.shields.io/badge/code-MIT-1fa9e0?labelColor=0a1428" alt="MIT license for code"></a>
 
 **English** · [简体中文](README.zh-CN.md) · [Download](https://github.com/ChristianYang37/LOLPingYourAI/releases/latest) · [▶ Demo video](docs/media/promo-en.mp4) · [Architecture](docs/architecture.md) · [Verification](docs/verification.md)
@@ -32,7 +32,7 @@ Writing *"in the PDF on the right, second equation, why divide by √d?"* takes 
 - **What:** the window it belongs to (app, title, bounds, a stable window ID).
 - **Intent:** the signal's instruction, such as *explain*, *help finish this*, *stop*, or *check back in 30 minutes*.
 
-The teammate is your existing Codex, Claude or DSH harness, with its own model, account, tools and memory. LOLPingYourAI adds no planner and no separate history service. It supplies the ping, a bundled skill and a narrow set of desktop tools.
+The teammate is your existing Codex, Claude, DSH or Doubao harness, with its own model, account, tools and memory. LOLPingYourAI adds no planner and no separate history service. It supplies the ping, a bundled skill and a narrow set of desktop tools.
 
 <table>
 <tr>
@@ -59,6 +59,7 @@ The teammate is your existing Codex, Claude or DSH harness, with its own model, 
 - Selecting a harness loads its own model catalog. Model and fast-mode choices are saved per harness; fast mode is **off by default**, resets to off when changing models, and only appears enabled when the backend advertises support. Changes apply next turn.
 - Reasoning defaults to **0**, the model's lowest supported level. **1** chooses the next level; larger indices clamp to the model's maximum. The effective level is displayed after a turn starts. DSH defaults to thinking on: its indices count enabled levels, with a separate off switch.
 - **DeepSeek Harness (DSH)** is available through ACP. See [installation, free text API setup and verification limits](docs/dsh.md).
+- **Doubao（豆包）** is a first-class teammate: it talks directly to the Volcano Ark OpenAI-compatible API (`ark.cn-beijing.volces.com/api/v3`), streams replies, sees pinged screenshots, and drives the same local MCP desktop tools through function calling. Bring your own Ark API key (see [Doubao setup](#doubao-setup)); nothing is stored on a server.
 
 v0.1.4 brings the chat homepage, upstream interaction improvements and exploration feedback to both desktop installers. Download assets appear when the tagged release passes CI.
 
@@ -95,7 +96,7 @@ The original eight-slot layout is kept. Extra signals are in the slot picker: **
 sequenceDiagram
   actor You
   participant App as LOLPingYourAI
-  participant AI as Codex / Claude
+  participant AI as Codex / Claude / Doubao
   You->>App: ⌥ drag, release on "?"
   Note over App: capture the 512×512 square<br/>and the window identity
   App->>AI: signal meaning + screenshot + context
@@ -147,6 +148,19 @@ Download **LOLPingYourAI-Setup-0.1.4.exe** from [v0.1.4](https://github.com/Chri
 
 The app discovers the Windows Codex desktop executable and standard npm installations. If needed, set `LOLPINGAI_CODEX` to the absolute `codex.exe` path before launching. Emergency stop is **Ctrl+Alt+Esc**. See [Windows build, tests and limitations](docs/windows.md).
 
+## Doubao setup
+
+Doubao（豆包）works on both macOS and Windows with any account that has access to the [Volcano Ark](https://console.volcengine.com/ark) platform:
+
+1. **Get an API key.** In the Volcano Ark console, create an API key (starts with `ARK_API_KEY` style credentials) and enable the model you want under *开通管理* (model access). Current curated model IDs include `doubao-seed-1-6-250615`, `doubao-seed-1-6-thinking-250615`, `doubao-1-5-pro-32k-250115`, `doubao-1-5-flash-32k-250115` and `doubao-1-5-vision-pro-32k-250115`; an inference endpoint ID you create (`ep-…`) can be typed into the custom model field too.
+2. **Give the app the key** — any one of:
+   - Settings → **AI Teammate** → pick **Doubao（豆包）** → paste the key into the *Doubao API key* field (stored only in local app settings), or
+   - set the `ARK_API_KEY` (or `DOUBAO_API_KEY`) environment variable before launching, or
+   - create a `doubao-key.txt` file containing the key in the app data directory (`~/Library/Application Support/LOLPingYourAI` on macOS, `%APPDATA%\LOLPingYourAI` on Windows).
+3. **Ping.** The teammate streams Markdown replies, sees the pinged screenshot (vision models), and can call `desktop_action`, `screenshot`, `reply_ping`, `save_handoff` and `ward` through the same local MCP bridge as the other teammates. Sessions continue across pings and restarts; history is stored locally.
+
+DSH users can also point their harness at Doubao with [`examples/dsh-doubao.patch.yml`](examples/dsh-doubao.patch.yml). The native Doubao teammate does not need DSH installed.
+
 ## Platform status
 
 | Combination | Status |
@@ -154,6 +168,7 @@ The app discovers the Windows Codex desktop executable and standard npm installa
 | macOS Apple Silicon + **Codex** | ✅ Real desktop loop tested with a live model (explain, edit, interrupt, restore, maximize, ward). DMG available. |
 | macOS + **Claude** | 🧪 Experimental Agent SDK with read-only context tools. Protocol-tested; authenticated desktop verification is still pending. |
 | macOS + **DSH** | 🧪 Real Bailian screenshot/edit/restore run on the preceding installed helper; current source has protocol and regression coverage. [Setup and limits](docs/dsh.md). |
+| macOS/Windows + **Doubao** | 🧪 Native OpenAI-compatible adapter with streaming, vision and MCP tool calling. Protocol-tested with a synthetic API/bridge; bring-your-own-key live verification is recorded in [docs/verification.md](docs/verification.md). |
 | Windows x64 | Native window/input regressions and packaged app startup/restart tested on Windows 10; Windows 2022/2025 CI and NSIS lifecycle checks. Harness and hardware-specific limits are recorded in [Windows verification](docs/windows.md). |
 
 What was actually exercised, and what wasn't, is recorded in [docs/verification.md](docs/verification.md).
@@ -217,7 +232,7 @@ pnpm dist:mac                                   # Apple Silicon DMG in release/
 pnpm dist                                       # Windows x64 installer (run on Windows)
 ```
 
-Reusable [acceptance tools](tools/acceptance/README.md) support Codex, Claude and DSH through the local bridge, with local-only diagnostic output. See the [Claude findings and repair plan](docs/claude-acceptance-audit.md) for the remaining native-input and UI issues.
+Reusable [acceptance tools](tools/acceptance/README.md) support Codex, Claude, DSH and Doubao through the local bridge, with local-only diagnostic output. See the [Claude findings and repair plan](docs/claude-acceptance-audit.md) for the remaining native-input and UI issues.
 
 | Path | What lives there |
 | --- | --- |
@@ -225,7 +240,7 @@ Reusable [acceptance tools](tools/acceptance/README.md) support Codex, Claude an
 | `native/desktop/` | Swift / C# helpers: window lookup, capture, scoped input |
 | `src/main/` | Electron main process, overlays, settings, teammate lifecycle |
 | `src/renderer/` | Ping and emote wheel overlay, React settings window |
-| `ai/` | Teammate service, Codex, Claude and DSH adapters, MCP server, local bridge, CLI |
+| `ai/` | Teammate service, Codex, Claude, DSH and Doubao adapters, MCP server, local bridge, CLI |
 | `skills/lolping-your-ai/` | The skill that teaches the agent what each ping means |
 | `promo/` | Remotion source for the demo video and README media |
 

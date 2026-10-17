@@ -54,7 +54,7 @@ export class Bridge {
       .catch(e => { throw new BridgeUnavailable('Bridge request failed or timed out', { cause: e }); });
     const value = await r.json();
     if (!r.ok) throw new BridgeError(String(value.error || `HTTP ${r.status}`), r.status);
-    if (method === 'status' && (!['codex', 'claude', 'dsh'].includes(value?.config?.harness) || typeof value.busy !== 'boolean' || !Array.isArray(value.history))) throw new Error('Invalid bridge status response');
+    if (method === 'status' && (!['codex', 'claude', 'dsh', 'doubao'].includes(value?.config?.harness) || typeof value.busy !== 'boolean' || !Array.isArray(value.history))) throw new Error('Invalid bridge status response');
     return value;
   }
 }
@@ -121,7 +121,7 @@ export async function poll(read, check, { timeoutMs = 60000, intervalMs = 500, n
 }
 
 export async function drive(bridge, plan, { boardPath, allowActions = false, log = () => {}, loadBoard = readBoard, waitOptions = {} } = {}) {
-  if (!['codex', 'claude', 'dsh'].includes(plan?.harness) || !Array.isArray(plan.steps) || !plan.steps.length) throw new Error('Plan requires a harness and nonempty steps');
+  if (!['codex', 'claude', 'dsh', 'doubao'].includes(plan?.harness) || !Array.isArray(plan.steps) || !plan.steps.length) throw new Error('Plan requires a harness and nonempty steps');
   // Validate the whole plan before any ping; a malformed later step must not
   // abandon an earlier turn that deliberately waits at working/received.
   for (const step of plan.steps) {

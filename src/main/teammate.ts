@@ -20,7 +20,7 @@ export async function startTeammate(overlays: OverlayManager, library: EmoteLibr
   const { app, ipcMain, screen, globalShortcut, powerMonitor } = electron;
   const root = app.isPackaged ? app.getAppPath().replace(/app\.asar$/, 'app.asar.unpacked') : app.getAppPath();
   const load = (file: string) => import(/* @vite-ignore */ pathToFileURL(join(root, 'ai', file)).href);
-  const [{ Store }, { Teammate }, { Desktop }, { CodexAdapter }, { ClaudeAdapter }, { DshAdapter }, { startBridge }, { IconCandidates }, { IconJob }] = await Promise.all(['store.mjs', 'service.mjs', 'desktop.mjs', 'harness/codex.mjs', 'harness/claude.mjs', 'harness/dsh.mjs', 'server.mjs', 'icons.mjs', 'icon-job.mjs'].map(load));
+  const [{ Store }, { Teammate }, { Desktop }, { CodexAdapter }, { ClaudeAdapter }, { DshAdapter }, { DoubaoAdapter }, { startBridge }, { IconCandidates }, { IconJob }] = await Promise.all(['store.mjs', 'service.mjs', 'desktop.mjs', 'harness/codex.mjs', 'harness/claude.mjs', 'harness/dsh.mjs', 'harness/doubao.mjs', 'server.mjs', 'icons.mjs', 'icon-job.mjs'].map(load));
   const store = new Store(settingsDir());
   const helper = app.isPackaged ? join(process.resourcesPath, process.platform === 'darwin' ? 'desktop-helper' : 'desktop-helper.exe') : join(root, 'native/desktop/build', process.platform === 'darwin' ? 'desktop-helper' : 'desktop-helper.exe');
   let companion: CompanionWindow | undefined;
@@ -35,6 +35,7 @@ export async function startTeammate(overlays: OverlayManager, library: EmoteLibr
     codex: new CodexAdapter({ command: process.env.LOLPINGAI_CODEX ?? process.env.CODEX_CLI_PATH ?? (existsSync(bundledCodex) ? bundledCodex : 'codex'), cwd: settingsDir(), mcp, skillPath: join(skillDir, 'SKILL.md') }),
     dsh: new DshAdapter({ command: process.execPath, args: [dshEntry], cwd: settingsDir(), mcp, skillPath: join(skillDir, 'SKILL.md'), patch: process.env.LOLPINGAI_DSH_PATCH ?? (existsSync(join(settingsDir(), 'dsh.patch.yml')) ? join(settingsDir(), 'dsh.patch.yml') : undefined), env: { ELECTRON_RUN_AS_NODE: '1' } }),
     claude: new ClaudeAdapter({ cwd: settingsDir(), mcp, skillPath: join(skillDir, 'SKILL.md'), executable: process.env.LOLPINGAI_CLAUDE }),
+    doubao: new DoubaoAdapter({ cwd: settingsDir(), store, mcp, skillPath: join(skillDir, 'SKILL.md'), apiKey: process.env.DOUBAO_API_KEY ?? process.env.ARK_API_KEY ?? '' }),
   });
   const adapters = makeAdapters(mcp);
   const service = new Teammate({ store, desktop, adapters }); await service.init();
